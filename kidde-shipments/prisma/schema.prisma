@@ -1,0 +1,41 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")   // Transaction pooler (puerto 6543) — runtime
+  directUrl = env("DIRECT_URL")     // Conexión directa (puerto 5432) — migraciones
+}
+
+model User {
+  id        String     @id @default(cuid())
+  name      String
+  email     String     @unique
+  password  String
+  role      Role       @default(GUARD)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  shipments Shipment[]
+}
+
+model Shipment {
+  id            String    @id @default(cuid())
+  companyName   String
+  matricula     String
+  licenseType   String
+  arrivalTime   String
+  departureTime String?
+  arrivalDate   DateTime
+  departureDate DateTime?
+  guardId       String
+  guard         User      @relation(fields: [guardId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum Role {
+  GUARD
+  ADMIN
+}
